@@ -162,3 +162,31 @@ class NexaIntegrationFilteringTest < ActionDispatch::IntegrationTest
     assert_equal "telefone deve conter 10 ou 11 dígitos", JSON.parse(response.body).fetch("error")
   end
 end
+
+
+class NexaIntegrationAuthorizationTest < ActionDispatch::IntegrationTest
+  setup do
+    password = SecureRandom.hex(16)
+    admin = User.create!(
+      name: "Admin integração",
+      email: "integration-boundary@example.com",
+      password: password,
+      password_confirmation: password,
+      role: "admin"
+    )
+    _session, @session_token = UserSession.issue_for!(admin)
+  end
+
+  test "sessão humana não autentica nas rotas técnicas" do
+    get "/api/v1/integrations/nexa/services",
+        headers: { "Authorization" => "Bearer #{@session_token}" }
+
+    assert_response :unauthorized
+  end
+
+  test "rota técnica exige bearer token" do
+    get "/api/v1/integrations/nexa/services"
+
+    assert_response :unauthorized
+  end
+end
