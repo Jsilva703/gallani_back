@@ -9,8 +9,11 @@ module Api
                                         .order(:name)
 
             if params[:service_id].present?
-              professionals = professionals.joins(:professional_services)
-                                           .where(professional_services: { service_id: params[:service_id] })
+              professionals = professionals.joins(:services)
+                                           .where(services: {
+                                             id: params[:service_id],
+                                             active: true
+                                           })
                                            .distinct
             end
 

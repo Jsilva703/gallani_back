@@ -4,10 +4,12 @@ module Api
       module Nexa
         class CustomersController < Api::BaseController
           def index
-            phone = normalize_phone(params.require(:phone))
+            phone = normalized_phone!(params.require(:phone))
             customers = Customer.where(phone: phone).order(:id)
 
             render json: { data: customers.map { |customer| CustomerSerializer.new(customer).as_json } }
+          rescue InvalidPhone => e
+            render json: { error: e.message }, status: :unprocessable_entity
           end
 
           def create
@@ -22,12 +24,17 @@ module Api
 
           private
 
+          InvalidPhone = Class.new(StandardError)
+
           def customer_params
             params.require(:customer).permit(:name, :phone, :email)
           end
 
-          def normalize_phone(value)
-            value.to_s.gsub(/\D/, "")
+          def normalized_phone!(value)
+            phone = value.to_s.gsub(/\D/, "")
+            return phone if phone.length.in?([10, 11])
+
+            raise InvalidPhone, "telefone deve conter 10 ou 11 dígitos"
           end
         end
       end
