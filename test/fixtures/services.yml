@@ -1,0 +1,12 @@
+corte:
+  name: Corte
+  description: Corte personalizado com acabamento na navalha.
+  price: 45.00
+  active: true
+
+pigmentacao:
+  name: Pigmentação
+  description: Correção de falhas na barba.
+  price: 40.00
+  active: false
+

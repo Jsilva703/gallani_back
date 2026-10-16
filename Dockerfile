@@ -24,6 +24,6 @@ RUN bundle _${BUNDLER_VERSION}_ install
 
 COPY . .
 
-EXPOSE 3000
+EXPOSE 3006
 
-CMD ["sh", "-lc", "rm -f tmp/pids/server.pid && exec bundle exec rails server -b 0.0.0.0 -p ${PORT:-3000}"]
+CMD ["sh", "-lc", "rm -f tmp/pids/server.pid && exec bundle exec rails server -b 0.0.0.0 -p ${PORT:-3006}"]

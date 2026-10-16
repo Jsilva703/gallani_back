@@ -1380,44 +1380,6 @@
       </library>
     </orderEntry>
     <orderEntry type="module-library">
-      <library name="minitest (v6.0.6) [path][gem]" type="rubylib">
-        <properties>
-          <option name="additionalInfo">
-            <AdditionalInfo>
-              <option name="authors" value="N/A" />
-              <option name="email" value="N/A" />
-              <option name="homepage" value="N/A" />
-              <option name="summary" value="N/A" />
-            </AdditionalInfo>
-          </option>
-          <option name="fromPath" value="true" />
-          <option name="name" value="minitest" />
-          <option name="requirePaths">
-            <list>
-              <option value="lib" />
-            </list>
-          </option>
-          <option name="url" value="file://$MODULE_DIR$/vendor/bundle/ruby/3.2.0/gems/minitest-6.0.6" />
-          <option name="version" value="6.0.6" />
-        </properties>
-        <CLASSES>
-          <root url="file://$MODULE_DIR$/vendor/bundle/ruby/3.2.0/gems/minitest-6.0.6/bin" />
-          <root url="file://$MODULE_DIR$/vendor/bundle/ruby/3.2.0/gems/minitest-6.0.6/lib" />
-          <root url="file://$MODULE_DIR$/vendor/bundle/ruby/3.2.0/gems/minitest-6.0.6/test" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="file://$MODULE_DIR$/vendor/bundle/ruby/3.2.0/gems/minitest-6.0.6/bin" />
-          <root url="file://$MODULE_DIR$/vendor/bundle/ruby/3.2.0/gems/minitest-6.0.6/lib" />
-          <root url="file://$MODULE_DIR$/vendor/bundle/ruby/3.2.0/gems/minitest-6.0.6/test" />
-        </SOURCES>
-        <excluded>
-          <root url="file://$MODULE_DIR$/vendor/bundle/ruby/3.2.0/gems/minitest-6.0.6/bin" />
-          <root url="file://$MODULE_DIR$/vendor/bundle/ruby/3.2.0/gems/minitest-6.0.6/test" />
-        </excluded>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
       <library name="msgpack (v1.8.5) [path][gem]" type="rubylib">
         <properties>
           <option name="additionalInfo">
