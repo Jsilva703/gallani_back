@@ -40,4 +40,6 @@ jobs:
           bundler-cache: true
 
       - run: bin/rails db:prepare
+      - run: bin/rails db:schema:dump
+      - run: git diff --exit-code db/schema.rb
       - run: bin/rails test
