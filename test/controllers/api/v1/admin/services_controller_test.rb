@@ -1,12 +1,24 @@
 require "test_helper"
+require "securerandom"
 
 class Api::V1::Admin::ServicesControllerTest < ActionDispatch::IntegrationTest
   setup do
     @service = services(:corte)
+
+    password = SecureRandom.hex(16)
+    admin = User.create!(
+      name: "Admin",
+      email: "services-admin@example.com",
+      password: password,
+      password_confirmation: password,
+      role: "admin"
+    )
+    _session, raw_token = UserSession.issue_for!(admin)
+    @headers = { "Authorization" => "Bearer #{raw_token}" }
   end
 
   test "lists services ordered by name" do
-    get api_v1_admin_services_url, as: :json
+    get api_v1_admin_services_url, as: :json, headers: @headers
 
     assert_response :success
     body = response.parsed_body
@@ -14,7 +26,10 @@ class Api::V1::Admin::ServicesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "filters services by query and active status" do
-    get api_v1_admin_services_url, params: { query: "pigment", active: false }, as: :json
+    get api_v1_admin_services_url,
+        params: { query: "pigment", active: false },
+        as: :json,
+        headers: @headers
 
     assert_response :success
     body = response.parsed_body
@@ -27,7 +42,8 @@ class Api::V1::Admin::ServicesControllerTest < ActionDispatch::IntegrationTest
     assert_difference("Service.count", 1) do
       post api_v1_admin_services_url,
            params: { service: { name: "Barba", description: "Modelagem", price: 30 } },
-           as: :json
+           as: :json,
+           headers: @headers
     end
 
     assert_response :created
@@ -41,7 +57,8 @@ class Api::V1::Admin::ServicesControllerTest < ActionDispatch::IntegrationTest
     assert_no_difference("Service.count") do
       post api_v1_admin_services_url,
            params: { service: { name: "", description: "Inválido", price: 0 } },
-           as: :json
+           as: :json,
+           headers: @headers
     end
 
     assert_response :unprocessable_entity
@@ -51,7 +68,8 @@ class Api::V1::Admin::ServicesControllerTest < ActionDispatch::IntegrationTest
   test "updates a service" do
     patch api_v1_admin_service_url(@service),
           params: { service: { price: 50, active: false } },
-          as: :json
+          as: :json,
+          headers: @headers
 
     assert_response :success
     body = response.parsed_body
@@ -59,4 +77,3 @@ class Api::V1::Admin::ServicesControllerTest < ActionDispatch::IntegrationTest
     assert_equal false, body["active"]
   end
 end
-
