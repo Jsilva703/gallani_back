@@ -87,8 +87,13 @@ Rails.application.configure do
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
 
+  config.hosts << "gallani-back.onrender.com"
+
   if ENV["APP_HOST"].present?
-    config.hosts << ENV["APP_HOST"]
+    configured_host = ENV["APP_HOST"].to_s
+      .sub(%r{\Ahttps?://}, "")
+      .delete_suffix("/")
+    config.hosts << configured_host
   end
 
   # Enable DNS rebinding protection and other `Host` header attacks.
