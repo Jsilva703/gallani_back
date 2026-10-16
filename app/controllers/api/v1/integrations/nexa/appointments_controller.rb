@@ -3,6 +3,20 @@ module Api
     module Integrations
       module Nexa
         class AppointmentsController < Api::BaseController
+          def index
+            appointments = Appointment.includes(:customer, :professional, :service)
+                                      .where(customer_id: params.require(:customer_id))
+                                      .where(status: Appointment::ACTIVE_STATUSES)
+                                      .where("date >= ?", Date.current)
+                                      .order(:date, :time)
+
+            render json: {
+              data: appointments.map do |appointment|
+                AppointmentSerializer.new(appointment, include_relations: true).as_json
+              end
+            }
+          end
+
           def show
             appointment = Appointment.includes(:customer, :professional, :service).find(params[:id])
             render json: { data: AppointmentSerializer.new(appointment, include_relations: true).as_json }
