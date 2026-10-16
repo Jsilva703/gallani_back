@@ -3,15 +3,16 @@ module Api
     module ProfessionalPortal
       class AppointmentsController < BaseController
         def create
-          appointment = current_professional.appointments.new(appointment_params)
+          appointment = AppointmentCreationService.new(
+            attributes: appointment_params,
+            professional: current_professional
+          ).call
 
-          if appointment.save
-            render json: {
-              data: AppointmentSerializer.new(appointment, include_relations: true).as_json
-            }, status: :created
-          else
-            render json: { errors: appointment.errors }, status: :unprocessable_entity
-          end
+          render json: {
+            data: AppointmentSerializer.new(appointment, include_relations: true).as_json
+          }, status: :created
+        rescue ActiveRecord::RecordInvalid => e
+          render json: { errors: e.record.errors }, status: :unprocessable_entity
         end
 
         private

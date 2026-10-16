@@ -68,17 +68,25 @@ class DashboardService
   end
 
   def top_services(range)
-    monthly_income(range)
-      .joins(:service)
-      .group("services.id", "services.name")
-      .sum(:amount)
-      .sort_by { |_, amount| -amount }
+    completed_counts = Appointment.where(date: range, status: "completed")
+                                  .joins(:service)
+                                  .group("services.id", "services.name")
+                                  .count
+
+    revenue = monthly_income(range)
+              .joins(:service)
+              .group("services.id", "services.name")
+              .sum(:amount)
+
+    completed_counts
+      .sort_by { |_, count| -count }
       .first(5)
-      .map do |(service_id, name), amount|
+      .map do |(service_id, name), count|
         {
           service_id: service_id,
           name: name,
-          revenue: amount.to_f
+          appointments_count: count,
+          revenue: revenue.fetch([service_id, name], 0).to_f
         }
       end
   end

@@ -3,8 +3,11 @@ module Api
     module Admin
       class CustomersController < Api::BaseController
         def index
-          customers = Customer.order(:name)
-          render json: { data: customers.map { |customer| CustomerSerializer.new(customer).as_json } }
+          customers = filter_by_query(Customer.order(:name))
+
+          render json: {
+            data: customers.map { |customer| CustomerSerializer.new(customer).as_json }
+          }
         end
 
         def create
@@ -21,6 +24,27 @@ module Api
 
         def customer_params
           params.require(:customer).permit(:name, :phone, :email)
+        end
+
+        def filter_by_query(scope)
+          query = params[:query].to_s.strip
+          return scope if query.blank?
+
+          conditions = [
+            "name ILIKE :text_query",
+            "email ILIKE :text_query"
+          ]
+          binds = {
+            text_query: "%#{ActiveRecord::Base.sanitize_sql_like(query)}%"
+          }
+
+          phone_query = query.gsub(/\D/, "")
+          if phone_query.present?
+            conditions << "phone ILIKE :phone_query"
+            binds[:phone_query] = "%#{ActiveRecord::Base.sanitize_sql_like(phone_query)}%"
+          end
+
+          scope.where(conditions.join(" OR "), **binds)
         end
       end
     end

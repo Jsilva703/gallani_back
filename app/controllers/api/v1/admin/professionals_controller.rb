@@ -49,6 +49,7 @@ module Api
           return render_invalid_services if service_ids_present && services.nil?
 
           Professional.transaction do
+            professional.lock!
             professional.update!(attributes)
             professional.services = services if service_ids_present
           end

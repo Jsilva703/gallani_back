@@ -57,6 +57,14 @@ Prefixo: `/api/v1/admin`
 
 Administradores gerenciam usuários, serviços, profissionais, disponibilidade, agenda, caixa e dashboard.
 
+Pontos do contrato atual:
+
+- serviços: filtro opcional por `query` e `active`
+- profissionais: filtro opcional por `query` e `active`
+- clientes: busca opcional por `query` usando nome, telefone ou e-mail
+- bloqueios: filtros por profissional, data ou intervalo `from/to`
+- caixa: período por `start_date/end_date`, paginação 5/10/20 e resumo com entrada, despesa, saldo e ticket médio
+
 ## Acesso do profissional
 
 Prefixo: `/api/v1/professional`
@@ -69,7 +77,7 @@ O profissional só acessa o próprio contexto e não altera cadastro, serviços 
 - `POST /customers`
 - `POST /appointments`
 
-Ao criar um agendamento, o backend ignora qualquer `professional_id` enviado e usa o profissional autenticado.
+Ao criar um agendamento, o backend ignora qualquer `professional_id` e qualquer `price` enviado e usa o profissional autenticado e o preço atual do serviço.
 
 ## Integração Nexa
 
@@ -99,5 +107,8 @@ Prefixo: `/api/v1/integrations/nexa`
 - Horários são cadastrados explicitamente; não há geração automática por duração.
 - Exceções de disponibilidade substituem os horários semanais da data.
 - A combinação profissional + data + horário não aceita dois agendamentos ativos.
+- Criação e remarcação de agendamento são serializadas por profissional para não concorrer com bloqueios.
+- Agendamentos concluídos, cancelados ou marcados como falta não podem ser reabertos por remarcação.
+- O preço do agendamento sempre é copiado do serviço no momento da criação.
 - A conclusão de um agendamento cria uma única entrada financeira.
 - O preço do agendamento fica armazenado no próprio agendamento.
