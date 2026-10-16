@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_10_16_131100) do
+ActiveRecord::Schema[7.1].define(version: 2026_10_16_131200) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -37,6 +37,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_16_131100) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["customer_id"], name: "index_appointments_on_customer_id"
+    t.index ["customer_id", "status", "date", "time"], name: "index_appointments_on_customer_status_date_time"
     t.index ["date", "status"], name: "index_appointments_on_date_and_status"
     t.index ["professional_id", "date", "time"], name: "index_appointments_active_slot_unique", unique: true, where: "((status)::text = ANY (ARRAY[('scheduled'::character varying)::text, ('confirmed'::character varying)::text]))"
     t.index ["professional_id"], name: "index_appointments_on_professional_id"
