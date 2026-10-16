@@ -119,3 +119,46 @@ class NexaIntegrationTest < ActionDispatch::IntegrationTest
     assert_empty JSON.parse(response.body).fetch("data")
   end
 end
+
+
+class NexaIntegrationFilteringTest < ActionDispatch::IntegrationTest
+  setup do
+    @service = Service.create!(
+      name: "Serviço ativo",
+      description: "Ativo",
+      price: 40
+    )
+    @inactive_service = Service.create!(
+      name: "Serviço inativo",
+      description: "Inativo",
+      price: 30,
+      active: false
+    )
+    @professional = Professional.create!(
+      name: "Profissional ativo",
+      phone: "11912345678"
+    )
+    @professional.services << [@service, @inactive_service]
+
+    _record, raw = ApiToken.generate!(label: "nexa-filter-test")
+    @headers = { "Authorization" => "Bearer #{raw}" }
+  end
+
+  test "não lista profissional para serviço inativo" do
+    get "/api/v1/integrations/nexa/professionals",
+        params: { service_id: @inactive_service.id },
+        headers: @headers
+
+    assert_response :success
+    assert_empty JSON.parse(response.body).fetch("data")
+  end
+
+  test "rejeita telefone inválido na busca de cliente" do
+    get "/api/v1/integrations/nexa/customers",
+        params: { phone: "123" },
+        headers: @headers
+
+    assert_response :unprocessable_entity
+    assert_equal "telefone deve conter 10 ou 11 dígitos", JSON.parse(response.body).fetch("error")
+  end
+end
