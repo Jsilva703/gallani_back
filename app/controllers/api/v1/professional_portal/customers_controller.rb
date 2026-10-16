@@ -8,15 +8,22 @@ module Api
           query = params[:query].to_s.strip
           return render json: { data: [] } if query.blank?
 
-          text_query = "%#{ActiveRecord::Base.sanitize_sql_like(query)}%"
-          phone_query = "%#{ActiveRecord::Base.sanitize_sql_like(query.gsub(/\D/, ""))}%"
+          conditions = [
+            "name ILIKE :text_query",
+            "email ILIKE :text_query"
+          ]
+          binds = {
+            text_query: "%#{ActiveRecord::Base.sanitize_sql_like(query)}%"
+          }
+
+          phone_query = query.gsub(/\D/, "")
+          if phone_query.present?
+            conditions << "phone ILIKE :phone_query"
+            binds[:phone_query] = "%#{ActiveRecord::Base.sanitize_sql_like(phone_query)}%"
+          end
 
           customers = Customer
-                      .where(
-                        "name ILIKE :text_query OR email ILIKE :text_query OR phone ILIKE :phone_query",
-                        text_query: text_query,
-                        phone_query: phone_query
-                      )
+                      .where(conditions.join(" OR "), **binds)
                       .order(:name)
                       .limit(MAX_RESULTS)
 
