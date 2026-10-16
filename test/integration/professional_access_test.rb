@@ -67,12 +67,26 @@ class ProfessionalAccessTest < ActionDispatch::IntegrationTest
       email: "existing@example.com"
     )
 
+    Customer.create!(
+      name: "Outro Cliente",
+      phone: "11988886666",
+      email: "other@example.com"
+    )
+
     get "/api/v1/professional/customers",
         params: { query: "Existente" },
         headers: @headers
 
     assert_response :success
-    assert_equal existing.id, JSON.parse(response.body).dig("data", 0, "id")
+    result = JSON.parse(response.body).fetch("data")
+    assert_equal [existing.id], result.map { |customer| customer.fetch("id") }
+
+    get "/api/v1/professional/customers",
+        params: { query: "NaoExiste" },
+        headers: @headers
+
+    assert_response :success
+    assert_empty JSON.parse(response.body).fetch("data")
 
     post "/api/v1/professional/customers",
          params: {
