@@ -4,13 +4,13 @@ module Api
       class BlockedSlotsController < Api::BaseController
         def index
           blocked_slots = BlockedSlot.order(:date, :time)
-          blocked_slots = blocked_slots.where("date >= ?", parse_date(params[:from])) if params[:from].present?
+          blocked_slots = apply_date_filters(blocked_slots)
           blocked_slots = blocked_slots.where(professional_id: params[:professional_id]) if params[:professional_id].present?
           blocked_slots = blocked_slots.where(date: parse_date(params[:date])) if params[:date].present?
 
           render json: { data: blocked_slots.map { |slot| BlockedSlotSerializer.new(slot).as_json } }
-        rescue Date::Error
-          render json: { error: "data inválida" }, status: :unprocessable_entity
+        rescue Date::Error, ArgumentError => e
+          render json: { error: e.message.presence || "data inválida" }, status: :unprocessable_entity
         end
 
         def bulk_create
@@ -57,6 +57,17 @@ module Api
         private
 
         BlockConflict = Class.new(StandardError)
+
+        def apply_date_filters(scope)
+          from = parse_date(params[:from]) if params[:from].present?
+          to = parse_date(params[:to]) if params[:to].present?
+
+          raise ArgumentError, "período inválido" if from && to && to < from
+
+          scope = scope.where("date >= ?", from) if from
+          scope = scope.where("date <= ?", to) if to
+          scope
+        end
 
         def validate_block_request!(professional, date, times)
           existing = professional.blocked_slots.where(date: date)
