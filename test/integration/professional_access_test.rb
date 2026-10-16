@@ -101,7 +101,7 @@ class ProfessionalAccessTest < ActionDispatch::IntegrationTest
     assert_response :created
   end
 
-  test "cria agendamento somente para si mesmo" do
+  test "cria agendamento somente para si mesmo e não controla o preço" do
     customer = Customer.create!(
       name: "Cliente",
       phone: "11966665555"
@@ -114,7 +114,8 @@ class ProfessionalAccessTest < ActionDispatch::IntegrationTest
              professional_id: @other_professional.id,
              service_id: @service.id,
              date: @date.iso8601,
-             time: "10:00"
+             time: "10:00",
+             price: 1
            }
          }.to_json,
          headers: @headers

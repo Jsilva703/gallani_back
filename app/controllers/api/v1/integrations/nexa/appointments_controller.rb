@@ -9,15 +9,13 @@ module Api
           end
 
           def create
-            appointment = Appointment.new(appointment_params)
+            appointment = AppointmentCreationService.new(attributes: appointment_params).call
 
-            if appointment.save
-              render json: {
-                data: AppointmentSerializer.new(appointment, include_relations: true).as_json
-              }, status: :created
-            else
-              render json: { errors: appointment.errors }, status: :unprocessable_entity
-            end
+            render json: {
+              data: AppointmentSerializer.new(appointment, include_relations: true).as_json
+            }, status: :created
+          rescue ActiveRecord::RecordInvalid => e
+            render json: { errors: e.record.errors }, status: :unprocessable_entity
           end
 
           def cancel
@@ -36,22 +34,21 @@ module Api
 
           def reschedule
             appointment = Appointment.find(params[:id])
-
-            Appointment.transaction do
-              appointment.update!(
-                date: Date.iso8601(params.require(:date)),
-                time: params.require(:time),
-                status: "scheduled"
-              )
-            end
+            appointment = AppointmentRescheduleService.new(
+              appointment: appointment,
+              date: params.require(:date),
+              time: params.require(:time)
+            ).call
 
             render json: {
               data: AppointmentSerializer.new(appointment, include_relations: true).as_json
             }
           rescue Date::Error
             render json: { error: "data inválida" }, status: :unprocessable_entity
-          rescue ActiveRecord::RecordInvalid
-            render json: { errors: appointment.errors }, status: :unprocessable_entity
+          rescue AppointmentRescheduleService::InvalidStatus => e
+            render json: { error: e.message }, status: :unprocessable_entity
+          rescue ActiveRecord::RecordInvalid => e
+            render json: { errors: e.record.errors }, status: :unprocessable_entity
           end
 
           private
@@ -62,8 +59,7 @@ module Api
               :professional_id,
               :service_id,
               :date,
-              :time,
-              :price
+              :time
             )
           end
         end

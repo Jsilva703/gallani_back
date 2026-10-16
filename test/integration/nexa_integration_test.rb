@@ -34,7 +34,7 @@ class NexaIntegrationTest < ActionDispatch::IntegrationTest
     }
   end
 
-  test "consulta disponibilidade e cria agendamento" do
+  test "consulta disponibilidade e cria agendamento com preço do serviço" do
     get "/api/v1/integrations/nexa/availability",
         params: {
           professional_id: @professional.id,
@@ -52,12 +52,14 @@ class NexaIntegrationTest < ActionDispatch::IntegrationTest
              professional_id: @professional.id,
              service_id: @service.id,
              date: @date.iso8601,
-             time: "10:00"
+             time: "10:00",
+             price: 1
            }
          }.to_json,
          headers: @headers
 
     assert_response :created
+    assert_equal 50.0, JSON.parse(response.body).dig("data", "price")
 
     get "/api/v1/integrations/nexa/availability",
         params: {
