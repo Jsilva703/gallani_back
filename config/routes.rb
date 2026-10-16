@@ -59,7 +59,7 @@ Rails.application.routes.draw do
           resources :customers, only: %i[index create]
           resource :availability, only: :show, controller: "availability"
 
-          resources :appointments, only: %i[show create] do
+          resources :appointments, only: %i[index show create] do
             patch :cancel, on: :member
             patch :reschedule, on: :member
           end
